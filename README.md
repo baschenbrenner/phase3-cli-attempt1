@@ -4,6 +4,19 @@ We propose an Author-Books-Reviews CLI for our phase 3 project
 
 We are going to work collaboratively on the project with intermittent meetings to touch base on parts of the project
 
+### Creating tables/models
+ - cd Project_folder
+ - create lib folder
+ - run `alembic init migrations`
+ - touch models.py
+ - ls migrations/env.py. Change en.py line 21
+	- from models import Base
+	- target_metadata = Base.metadata
+ - ls alembic.ini, point to correct database
+	- sqlalchemy.url = sqlite:///models.db
+ - Create Base class and other table classes in models.py
+ - run `alembic revision --autogenerate -m 'Adding classes'`
+ - `alembic upgrade head`
 
 
 Tables
@@ -14,7 +27,7 @@ Authors: id:Integer,
 
 Books: id: Integer
 	book_name: String,
-            author_id:String (Foreign Key)
+    author_id:String (Foreign Key)
 	Publish_year: Integer
 	reviews: list (relationship(Reviews)
 
