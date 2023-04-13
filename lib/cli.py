@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 class CLI:
     def __init__(self):
         self.authors = [author for author in session.query(Author)]
+        #bring in other models
         self.start()
     
     def start(self):
@@ -14,7 +15,13 @@ class CLI:
         print("Please give us your name!")
         f_name = input("First name?")
         print("Thanks!")
-        choice = input("waht do you want to do?")
+        #get last name
+        for idx, auth in enumerate(self.authors):    
+            print(f'{idx+1}. {auth.name}')
+        #welcome statement
+        choice = input("what do you want to do?")
+        #three choices, see all authors, see all books, add an author
+        
         if choice == 1:
             print("Goodbye!")
 
