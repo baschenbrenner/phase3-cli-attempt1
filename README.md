@@ -1,5 +1,5 @@
 Starting out
-
+Test test
 We propose an Author-Books-Reviews CLI for our phase 3 project
 
 We are going to work collaboratively on the project with intermittent meetings to touch base on parts of the project
@@ -66,3 +66,15 @@ Models - models.py - Aastha
 Work on bringing the seed data in through an API - Dustin
 Writing CLI functionality plan 
 Working on cli.py file 
+
+
+Welcome to our Book App!
+Please give us your name:
+First Name?
+Last Name?
+Menu Display
+1. Author List
+2. Show my Name
+3. Exit
+What you would like to do?
+

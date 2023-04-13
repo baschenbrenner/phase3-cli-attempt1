@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, func
 from sqlalchemy import ForeignKey, Table, Column, Integer, String, DateTime, MetaData
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 }
@@ -21,8 +22,7 @@ class Author(Base):
     books = relationship('Book', backref=backref('author'))
 
     def __repr__(self):
-        return f'<Author(id={self.id})>, ' + \
-            f'<Author(name={self.name})>, ' 
+        return f'<#Author(id={self.id} name={self.name})>' 
     
 class Book(Base):
     # id: Integer
@@ -40,10 +40,7 @@ class Book(Base):
     reviews = relationship('Review', backref=backref('book'))
 
     def __repr__(self):
-        return f'<Book(id={self.id})>, ' + \
-            f'<Book(name={self.book_name})>, ' + \
-            f'<Book(publish_year={self.publish_year})>,' + \
-            f'<Book(reviews={self.reviews})>,' 
+        return f'<#Book(id={self.id} book_name={self.book_name} publish_year={self.publish_year} reviews={self.reviews})>,' 
     
 class Review(Base):
     # id:Integer,
@@ -61,8 +58,6 @@ class Review(Base):
     
 
     def __repr__(self):
-        return f'<Review(id={self.id})>, ' + \
-            f'<Review(name={self.name})>, ' + \
-            f'<Book(comment={self.comment})>,' 
+        return f'<#Review(id={self.id} name={self.name} comment={self.comment})>,' 
             
            
