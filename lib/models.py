@@ -2,6 +2,8 @@ from sqlalchemy import create_engine, func
 from sqlalchemy import ForeignKey, Table, Column, Integer, String, DateTime, MetaData
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
 
 convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
@@ -10,43 +12,57 @@ metadata = MetaData(naming_convention=convention)
 
 Base = declarative_base(metadata=metadata)
 
+engine = create_engine('sqlite:///lib/models.db')
+Session = sessionmaker(bind=engine)
+session = Session()
+
+
 class Author(Base):
     # Authors: id:Integer,
-    # name:String, 
+    # name:String,
     # books:list (relationship(Books))
     __tablename__ = 'authors'
 
     id = Column(Integer(), primary_key=True)
     name = Column(String())
-    
+
     books = relationship('Book', backref=backref('author'))
 
+    @classmethod
+    def create_and_add_to_cli(self, name, cli):
+        author = Author(name=name)
+        session.add(author)
+        session.commit()
+        cli.authors.append(author)
+
     def __repr__(self):
-        return f'<#Author(id={self.id} name={self.name})>' 
-    
+        return f'<#Author(id={self.id} name={self.name})>'
+
+
 class Book(Base):
     # id: Integer
-	# book_name: String,
+    # book_name: String,
     # author_id:String (Foreign Key)
-	# Publish_year: Integer
-	# reviews: list (relationship(Reviews)
+    # Publish_year: Integer
+    # reviews: list (relationship(Reviews)
     __tablename__ = 'books'
 
     id = Column(Integer(), primary_key=True)
     book_name = Column(String())
     publish_year = Column(Integer())
     author_id = Column(Integer, ForeignKey('authors.id'))
-    
+
     reviews = relationship('Review', backref=backref('book'))
 
     def __repr__(self):
-        return f'<#Book(id={self.id} book_name={self.book_name} publish_year={self.publish_year} reviews={self.reviews})>,' 
-    
+        return f'<#Book(id={self.id} book_name={self.book_name} publish_year={self.publish_year} reviews={self.reviews})>,'
+
+
 class Review(Base):
     # id:Integer,
-	# Comment: String
-	# Name: string
-	# Book_id:(Foreign Key)
+    # Comment: String
+    # Name: string
+    # Book_id:(Foreign Key)
 
     __tablename__ = 'reviews'
 
@@ -54,10 +70,6 @@ class Review(Base):
     comment = Column(String())
     name = Column(String())
     book_id = Column(Integer, ForeignKey('books.id'))
-    
-    
 
     def __repr__(self):
-        return f'<#Review(id={self.id} name={self.name} comment={self.comment})>,' 
-            
-           
+        return f'<#Review(id={self.id} name={self.name} comment={self.comment})>,'
