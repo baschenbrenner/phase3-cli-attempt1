@@ -50,6 +50,8 @@ class CLI:
                 author_name = self.get_author_name()
                 Author.create_and_add_to_cli(author_name, self)
                 self.start()
+            print("Remember:\nTo see all authors enter 'pa'\nTo see all books enter 'pb'\nTo add an author type 'aa'\nTo exit type 'exit'\n")
+            choice = input("What would you like to do next?")
 
         print('Have a nice day!')
         quit()
@@ -61,7 +63,6 @@ class CLI:
          for idx, item in enumerate(items)]
 
     def list_author_options(self):
-
         self.print_indexed_items(self.authors, 'name')
         choice = ''
 
@@ -69,14 +70,14 @@ class CLI:
             choice = input(
                 "To see all books by an author enter the number of the author\nTo return to main menu type 'menu'\nTo exit type 'exit'\n")
 
-        if choice.isdigit() and int(choice) - 1 in range(len(self.authors)):
-            author = self.authors[int(choice) - 1]
-            self.print_indexed_items(author.books, 'book_name')
-        elif choice.isdigit():
-            self.list_author_options()
-        elif choice == 'pa':
-            self.print_indexed_items(self.authors, 'name')
-            self.list_author_options()
+            if choice.isdigit() and int(choice) - 1 in range(len(self.authors)):
+                author = self.authors[int(choice) - 1]
+                self.print_indexed_items(author.books, 'book_name')
+            elif choice.isdigit():
+                self.list_author_options()
+            elif choice == 'pa':
+                self.print_indexed_items(self.authors, 'name')
+                self.list_author_options()
 
         return choice
 
