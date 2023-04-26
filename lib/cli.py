@@ -12,7 +12,7 @@ class CLI:
     def __init__(self):
         self.authors = [author for author in session.query(Author)]
         self.books = [book for book in session.query(Book)]
-        # bring in other models
+        self.reviews = [review for review in session.query(Review)]
         self.name = self.get_name()
         self.start()
 
@@ -26,9 +26,11 @@ class CLI:
     def get_name(self):
         print("Welcome to our Book App")
         print("Please give us your name!")
-        f_name = input("First name?")
+        f_name = input("What is your first name?")
         print("Thanks!")
-        return f_name
+        l_name = input("What is your last name?")
+        return f_name + " " + l_name
+        #error handling for weird input?
 
     def start(self):
 
@@ -63,7 +65,6 @@ class CLI:
          for idx, item in enumerate(items)]
 
     def list_author_options(self):
-        self.print_indexed_items(self.authors, 'name')
         choice = ''
 
         while (not CLI.valid_choice(['pa', 'menu', 'exit'], choice) and not choice.isdigit()):
@@ -73,6 +74,7 @@ class CLI:
             if choice.isdigit() and int(choice) - 1 in range(len(self.authors)):
                 author = self.authors[int(choice) - 1]
                 self.print_indexed_items(author.books, 'book_name')
+                choice = self.list_book_options(author)
             elif choice.isdigit():
                 self.list_author_options()
             elif choice == 'pa':
@@ -80,6 +82,30 @@ class CLI:
                 self.list_author_options()
 
         return choice
+    
+    def list_book_options(self, author):
+        choice = ''
+
+        while (not CLI.valid_choice(['add', 'menu', 'exit'], choice) and not choice.isdigit()):
+            choice = input(
+                "To add a book to this list type 'add'\nTo add a review to a specific book type the digit of the book\nTo return to main menu type 'menu'\nTo exit type 'exit'\n")
+
+            if choice.isdigit() and int(choice) - 1 in range(len(author.books)):
+                book = author.books[int(choice) - 1]
+                comment = input("Type your comment here:")
+                new_review = Review(comment=comment, name=self.name, book_id=choice.isdigit()-1)
+                session.add(new_review)
+                session.commit()
+                print(f"Your review has been added to {book.book_name}")
+                choice = self.list_book_options(author)
+            elif choice.isdigit():
+                self.list_book_options(author)
+            elif choice == 'add':
+                #need to add code here to add a new book to the author
+                choice = "exit"
+
+        return choice
+
 
     @ classmethod
     def valid_choice(self, options, input):
