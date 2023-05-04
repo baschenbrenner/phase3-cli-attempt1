@@ -13,7 +13,7 @@ class CLI:
         self.authors = [author for author in session.query(Author)]
         self.books = [book for book in session.query(Book)]
         self.reviews = [review for review in session.query(Review)]
-        self.name = self.get_name()
+        self.user_info = self.get_name()
         self.start()
 
     # Was going to make a dict mapped to choices, but seems like we would still need an if
@@ -29,7 +29,7 @@ class CLI:
         f_name = input("What is your first name?")
         print("Thanks!")
         l_name = input("What is your last name?")
-        return f_name + " " + l_name
+        return (f_name, l_name)
         #error handling for weird input?
 
     def start(self):
@@ -82,22 +82,23 @@ class CLI:
                 self.list_author_options()
 
         return choice
+    def show_reviews(self, reviews):
+        [print(f'{idx + 1}. {getattr(item, "comment")}-{getattr(item, "name")}') for idx, item in enumerate(reviews)]
     
     def list_book_options(self, author):
         choice = ''
 
         while (not CLI.valid_choice(['add', 'menu', 'exit'], choice) and not choice.isdigit()):
             choice = input(
-                "To add a book to this list type 'add'\nTo add a review to a specific book type the digit of the book\nTo return to main menu type 'menu'\nTo exit type 'exit'\n")
+                "To add a book to this list type 'add'\nTo go to the reviews page of a specific book type the digit of the book\nTo return to main menu type 'menu'\nTo exit type 'exit'\n")
 
             if choice.isdigit() and int(choice) - 1 in range(len(author.books)):
                 book = author.books[int(choice) - 1]
-                comment = input("Type your comment here:")
-                new_review = Review(comment=comment, name=self.name, book_id=choice.isdigit()-1)
-                session.add(new_review)
-                session.commit()
-                print(f"Your review has been added to {book.book_name}")
-                choice = self.list_book_options(author)
+                self.show_reviews(book.reviews)
+
+                
+                
+                choice = self.list_review_options(book)
             elif choice.isdigit():
                 self.list_book_options(author)
             elif choice == 'add':
@@ -106,6 +107,40 @@ class CLI:
 
         return choice
 
+    def list_review_options(self, book):
+        choice = ''
+
+        while (not CLI.valid_choice(['add', 'edit', 'delete', 'back', 'exit'], choice) and not choice.isdigit()):
+            choice = input(
+                "To add a review to this list type 'add'\nTo edit an existing review, type 'edit'\nTo delete an existing review, type 'delete'\n")
+        if choice.isdigit() and int(choice) - 1 in range(len(book.reviews)):
+            
+            choice = "exit"
+        elif choice.isdigit():
+            self.list_review_options(book)
+        elif choice == 'add':
+            comment = input("Type your comment here:")
+            new_review = Review(comment=comment, name=f'{self.user_info[0]} {self.user_info[1]}', book_id=book.id)
+            session.add(new_review)
+            session.commit()
+            print(f"Your review has been added to {book.book_name}")
+            self.show_reviews(book.reviews)
+            choice = self.list_review_options(book)
+        elif choice == 'delete':
+            choice2 = input("Which review do you want to delete - pick a number:")
+            id_of_rev = book.reviews[int(choice2)-1].id
+            review_to_delete = session.query(Review).get(id_of_rev)
+            # if the user_info tuple matches the name of the review to dleete then we can proceed with deletion
+            if self.user_info[0] + " " + self.user_info[1] == review_to_delete.name:
+                session.delete(review_to_delete)
+                session.commit()
+                print(f"The review has been deleted!")
+            else:
+                print(f"This review is not yours buddy!")
+            # else you get a rejection message, saying it isn't your review
+            self.show_reviews(book.reviews)
+            choice = self.list_review_options(book)
+        return choice
 
     @ classmethod
     def valid_choice(self, options, input):
@@ -120,3 +155,5 @@ if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()
     CLI()
+
+# For addign a review
