@@ -10,7 +10,7 @@ faker = "*"
 ipdb = "*"
 pytest = "*"
 importlib-resources = "*"
-
+tabulate = "*"
 
 [requires]
 python_version = "3.8.13"

@@ -3,6 +3,8 @@
 from models import Author, Book, Review
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from tabulate import tabulate
+import textwrap
 
 import ipdb
 
@@ -14,6 +16,7 @@ class CLI:
         self.books = [book for book in session.query(Book)]
         self.reviews = [review for review in session.query(Review)]
         self.user_info = self.get_name()
+        self.dict = {}
         self.start()
 
     # Was going to make a dict mapped to choices, but seems like we would still need an if
@@ -36,11 +39,12 @@ class CLI:
 
         # self.print_indexed_items(self.authors, 'name')
         choice = ''
-        while (not CLI.valid_choice(['pa', 'pb', 'aa', 'exit'], choice)):
+        while (not CLI.valid_choice(['pa', 'pb', 'aa','exit'], choice)):
             choice = input(
-                "To see all authors enter 'pa'\nTo see all books enter 'pb'\nTo add an author type 'aa'\nTo exit type 'exit'\n")
+                "To see all authors enter 'pa'\nTo see all books enter 'pb' \nTo add an author type 'aa'\nTo exit type 'exit'\n")
 
         while choice != 'exit':
+            print(choice)
             if choice == 'pa':
                 self.print_indexed_items(self.authors, 'name')
                 choice = self.list_author_options()
@@ -52,6 +56,8 @@ class CLI:
                 author_name = self.get_author_name()
                 Author.create_and_add_to_cli(author_name, self)
                 self.start()
+            
+
             print("Remember:\nTo see all authors enter 'pa'\nTo see all books enter 'pb'\nTo add an author type 'aa'\nTo exit type 'exit'\n")
             choice = input("What would you like to do next?")
 
@@ -63,18 +69,76 @@ class CLI:
     def print_indexed_items(self, items, attr):
         [print(f'{idx + 1}. {getattr(item, attr)}')
          for idx, item in enumerate(items)]
+        
+         
+    def make_dict(self, items, attr):
+        l=[]
+        l.append(('Author Name',"book Name","Reviews"))
+        for author in items:
+            temp=[]
+         
+            for book in author.books:
+                
+                temp_dict={}
+               
+                if len(book.reviews)==0:
+                    temp_dict[book.book_name]=[]
+                else:
+                    for review in book.reviews:
+
+                        if book.book_name in temp_dict:
+                            temp_dict[book.book_name].append(review.comment)
+                        else:
+                            temp_dict[book.book_name]=[]
+                    
+                temp.append(temp_dict)
+            
+            self.dict[author.name]=temp
+
+        
+       
+        for key,value in self.dict.items():
+            
+            count=0
+            for book_review in value:
+                new_tuple=(key,)
+                n_tuple=("",)
+                
+                if count==0:
+                    new_tuple=new_tuple+(list(book_review.keys())[0],("\n".join(list((book_review.values()))[0])))
+                    count = count +1
+                    l.append(new_tuple)
+                else:
+                    
+                
+                    n_tuple=n_tuple+(list(book_review.keys())[0],("\n".join(list((book_review.values()))[0])))
+                    count = count +1
+                   
+                        
+                       
+                    l.append(n_tuple)
+       
+            
+        
+        print(tabulate(l,headers="firstrow",showindex="always",tablefmt="mixed_grid"))
+
 
     def list_author_options(self):
         choice = ''
 
-        while (not CLI.valid_choice(['pa', 'menu', 'exit'], choice) and not choice.isdigit()):
+        while (not CLI.valid_choice(['pa', 'menu','pp', 'exit'], choice) and not choice.isdigit()):
             choice = input(
-                "To see all books by an author enter the number of the author\nTo return to main menu type 'menu'\nTo exit type 'exit'\n")
+                "To see all books by an author enter the number of the author\nTo return to main menu type 'menu'\npp\nTo exit type 'exit'\n")
 
             if choice.isdigit() and int(choice) - 1 in range(len(self.authors)):
                 author = self.authors[int(choice) - 1]
                 self.print_indexed_items(author.books, 'book_name')
                 choice = self.list_book_options(author)
+            elif choice == 'pp':
+                self.make_dict(self.authors, 'name')
+               
+                
+                choice = self.list_author_options()
             elif choice.isdigit():
                 self.list_author_options()
             elif choice == 'pa':
